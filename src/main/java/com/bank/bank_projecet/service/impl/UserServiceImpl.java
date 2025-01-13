@@ -9,6 +9,7 @@ import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.CreditDebitRequest;
 import com.bank.bank_projecet.dto.EmailDetails;
 import com.bank.bank_projecet.dto.EnquiryRequest;
+import com.bank.bank_projecet.dto.TransactionDto;
 import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
 import com.bank.bank_projecet.entity.User;
@@ -25,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class UserServiceImpl implements UserService{
 private final UserRepository userRepository;
 private final EmailServiceImpl emailService;
+private final TransactionServiceImpl transactionService;
   
 
     @Override
@@ -133,6 +135,13 @@ private final EmailServiceImpl emailService;
            user.setAccountBalance(user.getAccountBalance().add(request.getAmount()));
            userRepository.save(user);
 
+           TransactionDto transactionDto=TransactionDto.builder()
+           .accountNumber(user.getAccountNumber())
+           .amount(request.getAmount())
+           .transactionType("CREDIT")
+           .build();
+           transactionService.saveTransaction(transactionDto);
+
            return BankResponse.builder()
            .responseCode(AccountUtils.ACCOUNT_CREDIT_CODE)
            .responseMessage(AccountUtils.ACCOUNT_CREDIT_SUCCESS_MESSAGE)
@@ -172,6 +181,12 @@ private final EmailServiceImpl emailService;
            }
            user.setAccountBalance(user.getAccountBalance().subtract(request.getAmount()));
            userRepository.save(user);
+           TransactionDto transactionDto=TransactionDto.builder()
+           .accountNumber(user.getAccountNumber())
+           .amount(request.getAmount())
+           .transactionType("DEBIT")
+           .build();
+           transactionService.saveTransaction(transactionDto);
 
            return BankResponse.builder()
            .responseCode(AccountUtils.ACCOUNT_DEBIT_CODE)
@@ -238,6 +253,23 @@ private final EmailServiceImpl emailService;
 
                 userRepository.save(senderUser);
                 userRepository.save(reciverUser);
+
+                TransactionDto senderTransaction=TransactionDto.builder()
+                .accountNumber(senderUser.getAccountNumber())
+                .amount(request.getAmount())
+                .transactionType("TRANSFER")
+                .build();
+                TransactionDto reciverTransaction=TransactionDto.builder()
+                .accountNumber(reciverUser.getAccountNumber())
+                .amount(request.getAmount())
+                .transactionType("RECIVE")
+                .build();
+                transactionService.saveTransaction(senderTransaction);
+                transactionService.saveTransaction(reciverTransaction);
+
+
+
+
                 return BankResponse.builder()
                 .responseCode(AccountUtils.TRANSFER_DONE_SUCCESSFULLY_CODE)
                 .responseMessage(AccountUtils.TRANSFER_DONE_SUCCESSFULLY_MESSAGE)
