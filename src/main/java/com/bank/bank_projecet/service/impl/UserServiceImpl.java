@@ -9,12 +9,14 @@ import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.CreditDebitRequest;
 import com.bank.bank_projecet.dto.EmailDetails;
 import com.bank.bank_projecet.dto.EnquiryRequest;
+import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
 import com.bank.bank_projecet.entity.User;
 import com.bank.bank_projecet.repository.UserRepository;
 import com.bank.bank_projecet.service.UserService;
 import com.bank.bank_projecet.utils.AccountUtils;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 @Service
@@ -181,6 +183,84 @@ private final EmailServiceImpl emailService;
            .build())
            
            .build();
+    }
+
+    //@Transactional
+    @Override
+    public BankResponse transfer(TransferRequest request) {
+        
+        boolean isSenderExist=userRepository.existsByAccountNumber(request.getSenderAccountNumber());
+        boolean isReciverExist=userRepository.existsByAccountNumber(request.getReciverAcountNumber());
+
+        if(isSenderExist&&!isReciverExist){
+            return BankResponse.builder()
+            .responseCode(AccountUtils.RECIVER_ACCOUNT_NOT_FOUND_CODE)
+            .responseMessage(AccountUtils.RECIVER_ACCOUNT_NOT_FOUND_MESSAGE)
+            .accountInfo(null)
+            .build();
+        }
+        else if(!isSenderExist&&isReciverExist){
+            return BankResponse.builder()
+            .responseCode(AccountUtils.SENDER_ACCOUNT_NOT_FOUND_CODE)
+            .responseMessage(AccountUtils.SENDER_ACCOUNT_NOT_FOUND_MESSAGE)
+            .accountInfo(null)
+            .build();
+        }
+        else if(!isSenderExist&&!isReciverExist){
+
+            return BankResponse.builder()
+            .responseCode(AccountUtils.SENDER_AND_RECIVER_ACCOUNT_NOT_FOUND_CODE)
+            .responseMessage(AccountUtils.SENDER_AND_RECIVER_ACCOUNT_NOT_FOUND_MESSAGE)
+            .accountInfo(null)
+            .build();
+        }else{
+          
+            User senderUser=userRepository.findByAccountNumber(request.getSenderAccountNumber());
+            User reciverUser=userRepository.findByAccountNumber(request.getReciverAcountNumber());
+
+            if(senderUser.getAccountBalance().compareTo(request.getAmount())<0){
+
+                return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_BALANCE_NOT_AVIALBLE_CODE)
+                .responseMessage(AccountUtils.ACCOUNT_BALANCE_NOT_AVIALBLE_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                .accountName(senderUser.getF_Name()+" "+senderUser.getL_Name())
+                .accountBalance(senderUser.getAccountBalance())
+                .accountNumber(senderUser.getAccountNumber())
+                .build())
+                .build();
+
+            }else{
+
+
+                senderUser.setAccountBalance(senderUser.getAccountBalance().subtract(request.getAmount()));
+                reciverUser.setAccountBalance(reciverUser.getAccountBalance().add(request.getAmount()));
+
+                userRepository.save(senderUser);
+                userRepository.save(reciverUser);
+                return BankResponse.builder()
+                .responseCode(AccountUtils.TRANSFER_DONE_SUCCESSFULLY_CODE)
+                .responseMessage(AccountUtils.TRANSFER_DONE_SUCCESSFULLY_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                .accountName(senderUser.getF_Name()+" "+senderUser.getL_Name())
+                .accountBalance(senderUser.getAccountBalance())
+                .accountNumber(senderUser.getAccountNumber())
+                .build())
+                .build();
+
+
+
+            }
+
+
+
+
+
+
+
+
+        }
+
     }
 
 }

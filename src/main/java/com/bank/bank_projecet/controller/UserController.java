@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.CreditDebitRequest;
 import com.bank.bank_projecet.dto.EnquiryRequest;
+import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
 import com.bank.bank_projecet.service.impl.UserServiceImpl;
 
@@ -45,17 +46,26 @@ public class UserController {
         return ResponseEntity.ok(userService.nameEnquiry(EnquiryRequest.builder().accountNumber(accountNum).build()));
     }
 
-    @PostMapping("/credit-account")
+    @PostMapping("/credit")
     public ResponseEntity<BankResponse> creditAccount(@RequestBody CreditDebitRequest request) {
        
         
         return ResponseEntity.ok(userService.creditAccount(request));
     }
-    @PostMapping("/debit-account")
+    @PostMapping("/debit")
     public ResponseEntity<BankResponse> debitAccount(@RequestBody CreditDebitRequest request) {
        
         
         return ResponseEntity.ok(userService.debitAccount(request));
+    }
+
+
+
+    @PostMapping("/transfer")
+    public ResponseEntity<BankResponse> transfer(@RequestBody TransferRequest request) {
+       
+        
+        return ResponseEntity.ok(userService.transfer(request));
     }
     
 }
