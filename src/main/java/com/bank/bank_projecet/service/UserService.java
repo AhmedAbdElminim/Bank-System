@@ -6,6 +6,8 @@ import com.bank.bank_projecet.dto.EnquiryRequest;
 import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
 
+import jakarta.transaction.Transactional;
+
 public interface UserService {
 
     BankResponse createNewUser(UserDto userDto);
@@ -14,7 +16,7 @@ public interface UserService {
 
     BankResponse creditAccount(CreditDebitRequest request);
     BankResponse debitAccount(CreditDebitRequest request);
-
+    @Transactional
     BankResponse transfer (TransferRequest request);
 
 

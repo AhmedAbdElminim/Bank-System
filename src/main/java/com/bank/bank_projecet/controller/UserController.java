@@ -60,7 +60,6 @@ public class UserController {
     }
 
 
-
     @PostMapping("/transfer")
     public ResponseEntity<BankResponse> transfer(@RequestBody TransferRequest request) {
        

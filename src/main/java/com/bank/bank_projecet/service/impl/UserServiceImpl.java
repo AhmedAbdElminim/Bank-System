@@ -185,7 +185,7 @@ private final EmailServiceImpl emailService;
            .build();
     }
 
-    //@Transactional
+    @Transactional
     @Override
     public BankResponse transfer(TransferRequest request) {
         
