@@ -1,7 +1,7 @@
 package com.bank.bank_projecet.entity;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -33,8 +33,8 @@ public class Transaction {
     private String accountNumber;
     private String status;
     @CreationTimestamp
-    private Date createdDate;
+    private LocalDate createdDate;
     @UpdateTimestamp
-    private Date updateDate;
+    private LocalDate updateDate;
 
 }

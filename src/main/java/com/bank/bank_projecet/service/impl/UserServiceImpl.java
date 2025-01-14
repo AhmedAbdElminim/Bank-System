@@ -80,6 +80,8 @@ private final TransactionServiceImpl transactionService;
       .build();
     }
 
+    
+
 
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest enquiryRequest) {
@@ -293,6 +295,14 @@ private final TransactionServiceImpl transactionService;
 
         }
 
+    }
+
+
+
+
+    @Override
+    public User findUserByAccountNumber(String accountNumber) {
+       return userRepository .findByAccountNumber(accountNumber);
     }
 
 }
