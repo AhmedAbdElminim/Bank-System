@@ -2,6 +2,7 @@ package com.bank.bank_projecet.service.impl;
 
 import java.math.BigDecimal;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bank.bank_projecet.dto.AccountInfo;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService{
 private final UserRepository userRepository;
 private final EmailServiceImpl emailService;
 private final TransactionServiceImpl transactionService;
+private final PasswordEncoder passwordEncoder;
   
 
     @Override
@@ -49,6 +51,7 @@ private final TransactionServiceImpl transactionService;
         .l_Name(userDto.getL_Name())
         .phone(userDto.getPhone())
         .email(userDto.getEmail())
+        .password(passwordEncoder.encode(userDto.getPassword()))
         .accountNumber(AccountUtils.generateAccountNubmer())
         .address(userDto.getAddress())
         .status("Active")

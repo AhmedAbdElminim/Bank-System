@@ -24,6 +24,8 @@ private String l_Name;
 private String phone;
 @Schema(name = "User Email Address")
 private String email;
+@Schema(name = "User Account Password")
+private String password;
 @Schema(name = "User Address")
 private String address;
 @Schema(name = "User Gender")
