@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.CreditDebitRequest;
 import com.bank.bank_projecet.dto.EnquiryRequest;
+import com.bank.bank_projecet.dto.LoginDto;
 import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
 import com.bank.bank_projecet.service.impl.UserServiceImpl;
@@ -114,6 +115,21 @@ public class UserController {
        
         
         return ResponseEntity.ok(userService.transfer(request));
+    }
+
+    @Operation(
+        summary = "Login ",
+        description = "User  can make login usering email and password"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Http Status 200 Success"
+    )
+    @PostMapping("/login")
+    public ResponseEntity<BankResponse> login(@RequestBody LoginDto loginDto) {
+       
+        
+        return ResponseEntity.ok(userService.login(loginDto));
     }
     
 }

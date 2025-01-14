@@ -52,9 +52,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
         http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authorizeRequests -> 
-        authorizeRequests.requestMatchers(HttpMethod.POST,"/api/v1/users/create-account").permitAll()
-            .anyRequest()
-            .authenticated()
+        authorizeRequests.requestMatchers(HttpMethod.POST,"/api/v1/users/create-account")
+        .permitAll()
+        .requestMatchers(HttpMethod.POST,"/api/v1/users/login")
+        .permitAll()
+        .anyRequest()
+        .authenticated()
             )
         .sessionManagement(session -> 
         session.sessionCreationPolicy( 

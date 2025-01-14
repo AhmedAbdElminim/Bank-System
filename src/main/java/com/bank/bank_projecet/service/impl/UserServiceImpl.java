@@ -2,14 +2,19 @@ package com.bank.bank_projecet.service.impl;
 
 import java.math.BigDecimal;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bank.bank_projecet.Security.JwtTokenProvider;
 import com.bank.bank_projecet.dto.AccountInfo;
 import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.CreditDebitRequest;
 import com.bank.bank_projecet.dto.EmailDetails;
 import com.bank.bank_projecet.dto.EnquiryRequest;
+import com.bank.bank_projecet.dto.LoginDto;
 import com.bank.bank_projecet.dto.TransactionDto;
 import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
@@ -29,6 +34,8 @@ private final UserRepository userRepository;
 private final EmailServiceImpl emailService;
 private final TransactionServiceImpl transactionService;
 private final PasswordEncoder passwordEncoder;
+private final AuthenticationManager authenticationManager;
+private final JwtTokenProvider jwtTokenProvider;
   
 
     @Override
@@ -38,7 +45,7 @@ private final PasswordEncoder passwordEncoder;
 
 
             return BankResponse.builder()
-            .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
+            .responseCode(AccountUtils.ACCOUNT_EXISTS_MESSAGE)
             .responseMessage(AccountUtils.ACCOUNT_EXISTS_MESSAGE)
             .accountInfo(null)
             .build();
@@ -81,6 +88,34 @@ private final PasswordEncoder passwordEncoder;
       .accountBalance(savedUser.getAccountBalance())
       .build())
       .build();
+    }
+
+
+    @Override
+    public BankResponse login(LoginDto loginDto){
+
+        Authentication authentication =authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
+            );
+          
+
+            EmailDetails loginAlert=EmailDetails.builder()
+            .recipient(loginDto.getEmail())
+            .subject("NEW LOGING")
+            .messageBody("YOU LOGGED IN YOUR ACCOUNT, IF YOU DON\'T MAKE THIS RWQUEST. PLEASE CONTACT WITH US")
+            .attachment(null)
+            .build();
+            
+            emailService.sendEmailAlert(loginAlert);
+            
+            return BankResponse.builder()
+            .responseCode(AccountUtils.LOGIN_SUCCESS_MESSAGE)
+            .responseMessage(jwtTokenProvider.generateToken(authentication))
+            .accountInfo(null)
+            .build();
+
+
+        
     }
 
     

@@ -28,7 +28,8 @@ public static final String SENDER_AND_RECIVER_ACCOUNT_NOT_FOUND_MESSAGE="Sender 
 
 public static final String TRANSFER_DONE_SUCCESSFULLY_CODE="0011";
 public static final String TRANSFER_DONE_SUCCESSFULLY_MESSAGE="Your transfer Done Successfully";
-
+public static final String LOGIN_SUCCESS_CODE="012";
+public static final String LOGIN_SUCCESS_MESSAGE="Login Success";
 
 
 
