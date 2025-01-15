@@ -9,21 +9,21 @@ import com.bank.bank_projecet.service.TransactionService;
 
 import lombok.RequiredArgsConstructor;
 
-
 @Service
 @RequiredArgsConstructor
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
+
     @Override
     public void saveTransaction(TransactionDto transactionDto) {
-       Transaction transaction=Transaction.builder()
-       .transactionType(transactionDto.getTransactionType())
-       .accountNumber(transactionDto.getAccountNumber())
-       .status("SUCCESS")
-       .amount(transactionDto.getAmount())
-       .build();
-       transactionRepository.save(transaction);
+        Transaction transaction = Transaction.builder()
+                .transactionType(transactionDto.getTransactionType())
+                .accountNumber(transactionDto.getAccountNumber())
+                .status("SUCCESS")
+                .amount(transactionDto.getAmount())
+                .build();
+        transactionRepository.save(transaction);
 
     }
 

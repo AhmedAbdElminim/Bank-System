@@ -19,15 +19,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.bank.bank_projecet.dto.ExceptionResponse;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleSecurityException(Exception exception){
+    public ProblemDetail handleSecurityException(Exception exception) {
         ProblemDetail errorDetail = null;
 
-           // TODO send this stack trace to an observability tool
-           exception.printStackTrace();
+        // TODO send this stack trace to an observability tool
+        exception.printStackTrace();
 
-                  if (exception instanceof BadCredentialsException) {
+        if (exception instanceof BadCredentialsException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
             errorDetail.setProperty("description", "The username or password is incorrect");
 
@@ -65,7 +65,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> handlUserNotFoundException(UserNotFoundException ex) {
 
-        ExceptionResponse exception =new  ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
+        ExceptionResponse exception = new ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception);
 
     }
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
     @ExceptionHandler(AccountNumberNotFoundException.class)
     public ResponseEntity<?> handlAccountNumberNotFoundException(AccountNumberNotFoundException ex) {
 
-        ExceptionResponse exception =new  ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
+        ExceptionResponse exception = new ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception);
 
     }
@@ -81,26 +81,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
     @ExceptionHandler(DuplicatedEmailException.class)
     public ResponseEntity<?> handlDuplicatedEmailException(DuplicatedEmailException ex) {
 
-        ExceptionResponse exception =new  ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
+        ExceptionResponse exception = new ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception);
 
     }
-
-    
 
     @ExceptionHandler(BalanceNotEnoughException.class)
     public ResponseEntity<?> handlBalanceNotEnoughException(BalanceNotEnoughException ex) {
 
-        ExceptionResponse exception =new  ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
+        ExceptionResponse exception = new ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception);
 
     }
 
-    
     @ExceptionHandler(TransferBalanceToItSelfException.class)
     public ResponseEntity<?> handlTransferBalanceToItSelfException(TransferBalanceToItSelfException ex) {
 
-        ExceptionResponse exception =new  ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
+        ExceptionResponse exception = new ExceptionResponse(ex.getMessage(), Arrays.asList(ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception);
 
     }

@@ -40,172 +40,159 @@ public class BankStatementServiceImpl {
     private final UserServiceImpl userService;
     private final EmailServiceImpl emailService;
 
-    private static String FILE="D:\\Bank Pdfs\\MyStatement.pdf";
+    private static String FILE = "D:\\Bank Pdfs\\MyStatement.pdf";
 
+    public List<Transaction> generateBankStatement(String accountNumber, String startDate, String endDate)
+            throws FileNotFoundException, DocumentException {
+        LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+        LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
-
-
-
-    public List<Transaction>generateBankStatement(String accountNumber,String startDate,String endDate) throws FileNotFoundException, DocumentException{
-        LocalDate start=LocalDate.parse(startDate,DateTimeFormatter.ISO_DATE);
-        LocalDate end=LocalDate.parse(endDate,DateTimeFormatter.ISO_DATE);
-        
-        List<Transaction>transactionList=transactionRepository.findAll()
-        .stream()
-        .filter(transaction->transaction.getAccountNumber().equals(accountNumber))
-        .filter(
-            transaction -> {
-                LocalDate createdDate = transaction.getCreatedDate();
-                return (createdDate.isAfter(start) || createdDate.isEqual(start)) &&
-                       (createdDate.isBefore(end) || createdDate.isEqual(end));
-            }
-        )
-        .toList(); 
-        
-         
-
-          // Sort the transactions by createdDate
-          transactionList.sort(Comparator.comparing(Transaction::getCreatedDate));
-  
-         
-        
+        List<Transaction> transactionList = transactionRepository.findAll()
+                .stream()
+                .filter(transaction -> transaction.getAccountNumber().equals(accountNumber))
+                .filter(
+                        transaction -> {
+                            LocalDate createdDate = transaction.getCreatedDate();
+                            return (createdDate.isAfter(start) || createdDate.isEqual(start)) &&
+                                    (createdDate.isBefore(end) || createdDate.isEqual(end));
+                        })
+                .toList();
         designStatement(transactionList, accountNumber, startDate, endDate);
-      
-
         return transactionList;
     }
 
+    private void designStatement(List<Transaction> transactions, String accountNumber, String startDate, String endDate)
+            throws FileNotFoundException, DocumentException {
 
-    private void designStatement(List<Transaction>transactions,String accountNumber,String startDate,String endDate) throws FileNotFoundException, DocumentException{
+        User user = userService.findUserByAccountNumber(accountNumber);
 
+        Rectangle statementSize = new Rectangle(PageSize.A4);
+        Document document = new Document(statementSize);
+        OutputStream outputStream = new FileOutputStream(FILE);
+        PdfWriter.getInstance(document, outputStream);
+        document.open();
 
-        User user=userService.findUserByAccountNumber(accountNumber);
+        // Bank Info Table
+        PdfPTable bankInfoTable = new PdfPTable(1);
+        PdfPCell bankName = new PdfPCell(new Phrase("CIB Bank", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
+        bankName.setBorder(0);
+        bankName.setBackgroundColor(BaseColor.CYAN);
+        bankName.setPadding(15f);
+        bankName.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-Rectangle statementSize = new Rectangle(PageSize.A4);
-Document document = new Document(statementSize);
-OutputStream outputStream = new FileOutputStream(FILE);
-PdfWriter.getInstance(document, outputStream);
-document.open();
+        PdfPCell bankAddress = new PdfPCell(new Phrase("CAIRO, EGYPT", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        bankAddress.setBorder(0);
+        bankAddress.setPadding(10f);
+        bankAddress.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-// Bank Info Table
-PdfPTable bankInfoTable = new PdfPTable(1);
-PdfPCell bankName = new PdfPCell(new Phrase("CIB Bank", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
-bankName.setBorder(0);
-bankName.setBackgroundColor(BaseColor.CYAN);
-bankName.setPadding(15f);
-bankName.setHorizontalAlignment(Element.ALIGN_CENTER);
+        bankInfoTable.addCell(bankName);
+        bankInfoTable.addCell(bankAddress);
 
-PdfPCell bankAddress = new PdfPCell(new Phrase("CAIRO, EGYPT", FontFactory.getFont(FontFactory.HELVETICA, 12)));
-bankAddress.setBorder(0);
-bankAddress.setPadding(10f);
-bankAddress.setHorizontalAlignment(Element.ALIGN_CENTER);
+        // Statement Info Table
+        PdfPTable statementInfo = new PdfPTable(2);
+        statementInfo.setWidthPercentage(100);
 
-bankInfoTable.addCell(bankName);
-bankInfoTable.addCell(bankAddress);
+        PdfPCell beginDate = new PdfPCell(new Phrase("Start Date: " + startDate));
+        beginDate.setBorder(0);
+        beginDate.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        PdfPCell statement = new PdfPCell(
+                new Phrase("STATEMENT OF ACCOUNT", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+        statement.setBorder(0);
+        statement.setHorizontalAlignment(Element.ALIGN_LEFT);
 
-// Statement Info Table
-PdfPTable statementInfo = new PdfPTable(2);
-statementInfo.setWidthPercentage(100);
+        PdfPCell stopDate = new PdfPCell(new Phrase("End Date: " + endDate));
+        stopDate.setBorder(0);
+        stopDate.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        PdfPCell userName = new PdfPCell(new Phrase("Client Name: " + user.getF_Name() + " " + user.getL_Name()));
+        userName.setBorder(0);
+        userName.setHorizontalAlignment(Element.ALIGN_LEFT);
+        PdfPCell space = new PdfPCell();
+        space.setBorder(0);
+        space.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-PdfPCell beginDate = new PdfPCell(new Phrase("Start Date: " + startDate));
-beginDate.setBorder(0);
-beginDate.setHorizontalAlignment(Element.ALIGN_RIGHT);
-PdfPCell statement = new PdfPCell(new Phrase("STATEMENT OF ACCOUNT", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
-statement.setBorder(0);
-statement.setHorizontalAlignment(Element.ALIGN_LEFT);
+        PdfPCell userAddress = new PdfPCell(new Phrase("Client Address: " + user.getAddress()));
+        userAddress.setBorder(0);
+        userAddress.setHorizontalAlignment(Element.ALIGN_LEFT);
+        statementInfo.addCell(statement);
+        statementInfo.addCell(beginDate);
+        statementInfo.addCell(userName);
+        statementInfo.addCell(stopDate);
+        statementInfo.addCell(userAddress);
+        statementInfo.addCell(space);
 
-PdfPCell stopDate = new PdfPCell(new Phrase("End Date: " + endDate));
-stopDate.setBorder(0);
-stopDate.setHorizontalAlignment(Element.ALIGN_RIGHT);
-PdfPCell userName = new PdfPCell(new Phrase("Client Name: " + user.getF_Name() + " " + user.getL_Name()));
-userName.setBorder(0);
-userName.setHorizontalAlignment(Element.ALIGN_LEFT);
-PdfPCell space=new PdfPCell();
-space.setBorder(0);
-space.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        // Transaction Table
+        PdfPTable transactionTable = new PdfPTable(4);
+        transactionTable.setWidthPercentage(100);
+        transactionTable.setSpacingBefore(10f);
+        transactionTable.setSpacingAfter(10f);
 
-PdfPCell userAddress = new PdfPCell(new Phrase("Client Address: " + user.getAddress()));
-userAddress.setBorder(0);
-userAddress.setHorizontalAlignment(Element.ALIGN_LEFT);
-statementInfo.addCell(statement);
-statementInfo.addCell(beginDate);
-statementInfo.addCell(userName);
-statementInfo.addCell(stopDate);
-statementInfo.addCell(userAddress);
-statementInfo.addCell(space); 
+        PdfPCell date = new PdfPCell(new Phrase("DATE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        date.setBackgroundColor(BaseColor.CYAN);
+        date.setHorizontalAlignment(Element.ALIGN_CENTER);
 
+        PdfPCell transactionType = new PdfPCell(
+                new Phrase("TRANSACTION TYPE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        transactionType.setBackgroundColor(BaseColor.CYAN);
+        transactionType.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-// Transaction Table
-PdfPTable transactionTable = new PdfPTable(4);
-transactionTable.setWidthPercentage(100);
-transactionTable.setSpacingBefore(10f);
-transactionTable.setSpacingAfter(10f);
+        PdfPCell transactionAmount = new PdfPCell(
+                new Phrase("TRANSACTION AMOUNT", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        transactionAmount.setBackgroundColor(BaseColor.CYAN);
+        transactionAmount.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-PdfPCell date = new PdfPCell(new Phrase("DATE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-date.setBackgroundColor(BaseColor.CYAN);
-date.setHorizontalAlignment(Element.ALIGN_CENTER);
+        PdfPCell status = new PdfPCell(new Phrase("STATUS", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        status.setBackgroundColor(BaseColor.CYAN);
+        status.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-PdfPCell transactionType = new PdfPCell(new Phrase("TRANSACTION TYPE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-transactionType.setBackgroundColor(BaseColor.CYAN);
-transactionType.setHorizontalAlignment(Element.ALIGN_CENTER);
+        transactionTable.addCell(date);
+        transactionTable.addCell(transactionType);
+        transactionTable.addCell(transactionAmount);
+        transactionTable.addCell(status);
 
-PdfPCell transactionAmount = new PdfPCell(new Phrase("TRANSACTION AMOUNT", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-transactionAmount.setBackgroundColor(BaseColor.CYAN);
-transactionAmount.setHorizontalAlignment(Element.ALIGN_CENTER);
+        // Add transaction rows with alternating row colors
+        boolean isAlternateRow = false;
+        for (Transaction transaction : transactions) {
+            BaseColor rowColor = isAlternateRow ? BaseColor.CYAN : BaseColor.WHITE;
+            isAlternateRow = !isAlternateRow;
 
-PdfPCell status = new PdfPCell(new Phrase("STATUS", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-status.setBackgroundColor(BaseColor.CYAN);
-status.setHorizontalAlignment(Element.ALIGN_CENTER);
+            PdfPCell dateCell = new PdfPCell(new Phrase(transaction.getCreatedDate().toString()));
+            dateCell.setBackgroundColor(rowColor);
+            transactionTable.addCell(dateCell);
 
-transactionTable.addCell(date);
-transactionTable.addCell(transactionType);
-transactionTable.addCell(transactionAmount);
-transactionTable.addCell(status);
+            PdfPCell typeCell = new PdfPCell(new Phrase(transaction.getTransactionType().toString()));
+            typeCell.setBackgroundColor(rowColor);
+            transactionTable.addCell(typeCell);
 
-// Add transaction rows with alternating row colors
-boolean isAlternateRow = false;
-for (Transaction transaction : transactions) {
-    BaseColor rowColor = isAlternateRow ? BaseColor.CYAN : BaseColor.WHITE;
-    isAlternateRow = !isAlternateRow;
+            PdfPCell amountCell = new PdfPCell(new Phrase(transaction.getAmount().toString()));
+            amountCell.setBackgroundColor(rowColor);
+            transactionTable.addCell(amountCell);
 
-    PdfPCell dateCell = new PdfPCell(new Phrase(transaction.getCreatedDate().toString()));
-    dateCell.setBackgroundColor(rowColor);
-    transactionTable.addCell(dateCell);
+            PdfPCell statusCell = new PdfPCell(new Phrase(transaction.getStatus().toString()));
+            statusCell.setBackgroundColor(rowColor);
+            transactionTable.addCell(statusCell);
+        }
 
-    PdfPCell typeCell = new PdfPCell(new Phrase(transaction.getTransactionType().toString()));
-    typeCell.setBackgroundColor(rowColor);
-    transactionTable.addCell(typeCell);
+        // Footer
+        Paragraph footer = new Paragraph("Thank you for banking with CIB Bank.",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.CYAN));
+        footer.setAlignment(Element.ALIGN_CENTER);
 
-    PdfPCell amountCell = new PdfPCell(new Phrase(transaction.getAmount().toString()));
-    amountCell.setBackgroundColor(rowColor);
-    transactionTable.addCell(amountCell);
+        // Add all sections to the document
+        document.add(bankInfoTable);
+        document.add(statementInfo);
+        document.add(transactionTable);
+        document.add(footer);
 
-    PdfPCell statusCell = new PdfPCell(new Phrase(transaction.getStatus().toString()));
-    statusCell.setBackgroundColor(rowColor);
-    transactionTable.addCell(statusCell);
-}
+        document.close();
 
-// Footer
-Paragraph footer = new Paragraph("Thank you for banking with CIB Bank.", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12,BaseColor.CYAN));
-footer.setAlignment(Element.ALIGN_CENTER);
-
-// Add all sections to the document
-document.add(bankInfoTable);
-document.add(statementInfo);
-document.add(transactionTable);
-document.add(footer);
-
-document.close();
-
-      EmailDetails emailDetails=EmailDetails.builder()
-      .recipient(user.getEmail())
-      .messageBody("Kindly find your requested account transaction from \n"+startDate+"\n"+"to"+"\n"+endDate+"\n"+"attached!")
-      .subject("TRANSACTIONS REPORT")
-      .attachment(FILE)
-      .build();
-      emailService.sendEmailWithAttachment(emailDetails);
-
-
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(user.getEmail())
+                .messageBody("Kindly find your requested account transaction from \n" + startDate + "\n" + "to" + "\n"
+                        + endDate + "\n" + "attached!")
+                .subject("TRANSACTIONS REPORT")
+                .attachment(FILE)
+                .build();
+        emailService.sendEmailWithAttachment(emailDetails);
 
     }
 }

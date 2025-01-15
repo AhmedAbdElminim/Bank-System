@@ -18,28 +18,28 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
- private final UserRepository userRepository;
-    
+    private final UserRepository userRepository;
+
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    UserDetailsService userDetailsService(){
+    UserDetailsService userDetailsService() {
 
-        return userName -> userRepository.findByEmail(userName).orElseThrow(()->new UsernameNotFoundException("The User Not Found"));
+        return userName -> userRepository.findByEmail(userName)
+                .orElseThrow(() -> new UsernameNotFoundException("The User Not Found"));
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 
         return config.getAuthenticationManager();
     }
 
-
     @Bean
-    public AuthenticationProvider authenticationProvider (){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 
         authProvider.setUserDetailsService(userDetailsService());

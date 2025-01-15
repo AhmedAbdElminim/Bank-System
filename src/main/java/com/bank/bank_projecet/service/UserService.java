@@ -13,16 +13,20 @@ import jakarta.transaction.Transactional;
 public interface UserService {
 
     BankResponse createNewUser(UserDto userDto);
+
     BankResponse balanceEnquiry(EnquiryRequest enquiryRequest);
+
     String nameEnquiry(EnquiryRequest enquiryRequest);
 
     BankResponse depositAccount(DepositWithdrawRequest request);
+
     BankResponse withdrawAccount(DepositWithdrawRequest request);
+
     @Transactional
-    BankResponse transfer (TransferRequest request);
+    BankResponse transfer(TransferRequest request);
 
-    User  findUserByAccountNumber(String accountNumber);
+    User findUserByAccountNumber(String accountNumber);
+
     BankResponse login(LoginDto loginDto);
-
 
 }

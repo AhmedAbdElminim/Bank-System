@@ -14,9 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 import lombok.RequiredArgsConstructor;
-
 
 @Configuration
 @EnableWebSecurity
@@ -25,44 +23,37 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(authorizeRequests -> 
-        authorizeRequests.requestMatchers("/api/v1/users/create-account")
-            .permitAll()
-            .requestMatchers("/api/v1/users/login")
-            .permitAll()
-            .anyRequest()
-            .authenticated()
-            )
-        .sessionManagement(session -> 
-        session.sessionCreationPolicy( 
-        SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider)
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-   
+                .authorizeHttpRequests(
+                        authorizeRequests -> authorizeRequests.requestMatchers("/api/v1/users/create-account")
+                                .permitAll()
+                                .requestMatchers("/api/v1/users/login")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-    
 
-    @Bean 
-    CorsConfigurationSource corsConfigurationSource (){
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        configuration.setAllowedMethods(List.of("GET", "POST"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**",configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
 
-    } 
+    }
 
 }
