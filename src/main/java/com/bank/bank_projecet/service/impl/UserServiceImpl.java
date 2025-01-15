@@ -4,13 +4,12 @@ import java.math.BigDecimal;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bank.bank_projecet.dto.AccountInfo;
 import com.bank.bank_projecet.dto.BankResponse;
-import com.bank.bank_projecet.dto.CreditDebitRequest;
+import com.bank.bank_projecet.dto.DepositWithdrawRequest;
 import com.bank.bank_projecet.dto.EmailDetails;
 import com.bank.bank_projecet.dto.EnquiryRequest;
 import com.bank.bank_projecet.dto.LoginDto;
@@ -18,6 +17,11 @@ import com.bank.bank_projecet.dto.TransactionDto;
 import com.bank.bank_projecet.dto.TransferRequest;
 import com.bank.bank_projecet.dto.UserDto;
 import com.bank.bank_projecet.entity.User;
+import com.bank.bank_projecet.exception.AccountNumberNotFoundException;
+import com.bank.bank_projecet.exception.BalanceNotEnoughException;
+import com.bank.bank_projecet.exception.DuplicatedEmailException;
+import com.bank.bank_projecet.exception.TransferBalanceToItSelfException;
+import com.bank.bank_projecet.exception.UserNotFoundException;
 import com.bank.bank_projecet.repository.UserRepository;
 import com.bank.bank_projecet.service.UserService;
 import com.bank.bank_projecet.utils.AccountUtils;
@@ -42,12 +46,7 @@ private final JwtService jwtService;
 
         if(userRepository.existsByEmail(userDto.getEmail())){
 
-
-            return BankResponse.builder()
-            .responseCode(AccountUtils.ACCOUNT_EXISTS_MESSAGE)
-            .responseMessage(AccountUtils.ACCOUNT_EXISTS_MESSAGE)
-            .accountInfo(null)
-            .build();
+           throw new DuplicatedEmailException("This email already have an account");
         }
        
 
@@ -93,32 +92,37 @@ private final JwtService jwtService;
     @Override
     public BankResponse login(LoginDto loginDto){
 
+
+
+        if (!userRepository.findByEmail(loginDto.getEmail()).isPresent()){
+            throw new UserNotFoundException("Email or Password not correct");
+
+        }
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginDto.getEmail(),
-                    loginDto.getPassword()
-                )
-        );
-          
+            new UsernamePasswordAuthenticationToken(
+                loginDto.getEmail(),
+                loginDto.getPassword()
+            )
+    );
+      
 
-            EmailDetails loginAlert=EmailDetails.builder()
-            .recipient(loginDto.getEmail())
-            .subject("NEW LOGING")
-            .messageBody("YOU LOGGED IN YOUR ACCOUNT, IF YOU DON\'T MAKE THIS RWQUEST. PLEASE CONTACT WITH US")
-            .attachment(null)
-            .build();
-            
-            emailService.sendEmailAlert(loginAlert);
-            User user=userRepository.findByEmail(loginDto.getEmail()).get();
-            
-            return BankResponse.builder()
-            .responseCode(AccountUtils.LOGIN_SUCCESS_MESSAGE)
-            .responseMessage(jwtService.generateToken(user))
-            .accountInfo(null)
-            .build();
-
-
+        EmailDetails loginAlert=EmailDetails.builder()
+        .recipient(loginDto.getEmail())
+        .subject("NEW LOGING")
+        .messageBody("YOU LOGGED IN YOUR ACCOUNT, IF YOU DON\'T MAKE THIS RWQUEST. PLEASE CONTACT WITH US")
+        .attachment(null)
+        .build();
         
+        emailService.sendEmailAlert(loginAlert);
+        User user=userRepository.findByEmail(loginDto.getEmail()).get();
+        
+        return BankResponse.builder()
+        .responseCode(AccountUtils.LOGIN_SUCCESS_MESSAGE)
+        .responseMessage(jwtService.generateToken(user))
+        .accountInfo(null)
+        .build();
+
     }
 
     
@@ -130,14 +134,10 @@ private final JwtService jwtService;
 
        if(!userRepository.existsByAccountNumber(enquiryRequest.getAccountNumber())){
 
-        return BankResponse.builder()
-        .responseCode(AccountUtils.ACCOUNT_Not_EXIST_CODE)
-        .responseMessage(AccountUtils.ACCOUNT_Not_EXIST_MESSAGE)
-        .accountInfo(null)
-        .build();
+       throw new AccountNumberNotFoundException("Account with number : "+enquiryRequest.getAccountNumber()+" NOT FOUND");
        }
-       User user=userRepository.findByAccountNumber(enquiryRequest.getAccountNumber());
 
+       User user=userRepository.findByAccountNumber(enquiryRequest.getAccountNumber());
 
        return BankResponse.builder()
        .responseCode(AccountUtils.ACCOUNT_FOUND_CODE)
@@ -155,7 +155,7 @@ private final JwtService jwtService;
     public String nameEnquiry(EnquiryRequest enquiryRequest) {
 
         if(!userRepository.existsByAccountNumber(enquiryRequest.getAccountNumber())){
-            return AccountUtils.ACCOUNT_Not_EXIST_MESSAGE;
+            throw new AccountNumberNotFoundException("Account with number : "+enquiryRequest.getAccountNumber()+" NOT FOUND");
           
            }
            User user=userRepository.findByAccountNumber(enquiryRequest.getAccountNumber());
@@ -164,15 +164,11 @@ private final JwtService jwtService;
 
 
     @Override
-    public BankResponse creditAccount(CreditDebitRequest request) {
+    public BankResponse depositAccount(DepositWithdrawRequest request) {
  
         if(!userRepository.existsByAccountNumber(request.getAccountNumber())){
 
-            return BankResponse.builder()
-            .responseCode(AccountUtils.ACCOUNT_Not_EXIST_CODE)
-            .responseMessage(AccountUtils.ACCOUNT_Not_EXIST_MESSAGE)
-            .accountInfo(null)
-            .build();
+            throw new AccountNumberNotFoundException("Account with number : "+request.getAccountNumber()+" NOT FOUND");
            }
            User user=userRepository.findByAccountNumber(request.getAccountNumber());
            user.setAccountBalance(user.getAccountBalance().add(request.getAmount()));
@@ -200,27 +196,15 @@ private final JwtService jwtService;
 
 
     @Override
-    public BankResponse debitAccount(CreditDebitRequest request) {
+    public BankResponse withdrawAccount(DepositWithdrawRequest request) {
         if(!userRepository.existsByAccountNumber(request.getAccountNumber())){
 
-            return BankResponse.builder()
-            .responseCode(AccountUtils.ACCOUNT_Not_EXIST_CODE)
-            .responseMessage(AccountUtils.ACCOUNT_Not_EXIST_MESSAGE)
-            .accountInfo(null)
-            .build();
+            throw new AccountNumberNotFoundException("Account with number : "+request.getAccountNumber()+" NOT FOUND");
            }
            User user=userRepository.findByAccountNumber(request.getAccountNumber());
            if(user.getAccountBalance().compareTo(request.getAmount())<0){
 
-            return BankResponse.builder()
-            .responseCode(AccountUtils.ACCOUNT_BALANCE_NOT_AVIALBLE_CODE)
-            .responseMessage(AccountUtils.ACCOUNT_BALANCE_NOT_AVIALBLE_MESSAGE)
-            .accountInfo(AccountInfo.builder()
-            .accountName(user.getF_Name()+" "+user.getL_Name())
-            .accountBalance(user.getAccountBalance())
-            .accountNumber(user.getAccountNumber())
-            .build())
-            .build();
+           throw new BalanceNotEnoughException("Your Balance not Enough to withdraw. the available balance amount is :"+user.getAccountBalance().toString());
            }
            user.setAccountBalance(user.getAccountBalance().subtract(request.getAmount()));
            userRepository.save(user);
@@ -246,31 +230,23 @@ private final JwtService jwtService;
     @Transactional
     @Override
     public BankResponse transfer(TransferRequest request) {
+
+        if(request.getSenderAccountNumber().equals(request.getReciverAcountNumber())){
+            throw new TransferBalanceToItSelfException("You are not allowed to transfer balance to yourself");
+        }
         
         boolean isSenderExist=userRepository.existsByAccountNumber(request.getSenderAccountNumber());
         boolean isReciverExist=userRepository.existsByAccountNumber(request.getReciverAcountNumber());
 
-        if(isSenderExist&&!isReciverExist){
-            return BankResponse.builder()
-            .responseCode(AccountUtils.RECIVER_ACCOUNT_NOT_FOUND_CODE)
-            .responseMessage(AccountUtils.RECIVER_ACCOUNT_NOT_FOUND_MESSAGE)
-            .accountInfo(null)
-            .build();
+       if(isSenderExist&&!isReciverExist){
+           throw new AccountNumberNotFoundException("The account with number: "+request.getReciverAcountNumber()+" NOT FOUND");
         }
         else if(!isSenderExist&&isReciverExist){
-            return BankResponse.builder()
-            .responseCode(AccountUtils.SENDER_ACCOUNT_NOT_FOUND_CODE)
-            .responseMessage(AccountUtils.SENDER_ACCOUNT_NOT_FOUND_MESSAGE)
-            .accountInfo(null)
-            .build();
+            throw new AccountNumberNotFoundException("The account with number: "+request.getSenderAccountNumber()+" NOT FOUND");
         }
         else if(!isSenderExist&&!isReciverExist){
 
-            return BankResponse.builder()
-            .responseCode(AccountUtils.SENDER_AND_RECIVER_ACCOUNT_NOT_FOUND_CODE)
-            .responseMessage(AccountUtils.SENDER_AND_RECIVER_ACCOUNT_NOT_FOUND_MESSAGE)
-            .accountInfo(null)
-            .build();
+            throw new AccountNumberNotFoundException("data is invalid");
         }else{
           
             User senderUser=userRepository.findByAccountNumber(request.getSenderAccountNumber());
@@ -278,15 +254,7 @@ private final JwtService jwtService;
 
             if(senderUser.getAccountBalance().compareTo(request.getAmount())<0){
 
-                return BankResponse.builder()
-                .responseCode(AccountUtils.ACCOUNT_BALANCE_NOT_AVIALBLE_CODE)
-                .responseMessage(AccountUtils.ACCOUNT_BALANCE_NOT_AVIALBLE_MESSAGE)
-                .accountInfo(AccountInfo.builder()
-                .accountName(senderUser.getF_Name()+" "+senderUser.getL_Name())
-                .accountBalance(senderUser.getAccountBalance())
-                .accountNumber(senderUser.getAccountNumber())
-                .build())
-                .build();
+                throw new BalanceNotEnoughException("Your Balance not Enough to transfer. the available balance amount is :"+request.getAmount().toString());
 
             }else{
 

@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.bank_projecet.dto.BankResponse;
-import com.bank.bank_projecet.dto.CreditDebitRequest;
+import com.bank.bank_projecet.dto.DepositWithdrawRequest;
 import com.bank.bank_projecet.dto.EnquiryRequest;
 import com.bank.bank_projecet.dto.LoginDto;
 import com.bank.bank_projecet.dto.TransferRequest;
@@ -73,33 +73,33 @@ public class UserController {
         return ResponseEntity.ok(userService.nameEnquiry(EnquiryRequest.builder().accountNumber(accountNum).build()));
     }
     @Operation(
-        summary = "Credit",
+        summary = "Deposit",
         description = "Given ann account number and amount of balance and add it in user account"
     )
     @ApiResponse(
         responseCode = "200",
         description = "Http Status 200 Success"
     )
-    @PostMapping("/credit")
-    public ResponseEntity<BankResponse> creditAccount(@RequestBody CreditDebitRequest request) {
+    @PostMapping("/deposit")
+    public ResponseEntity<BankResponse> depositAccount(@RequestBody DepositWithdrawRequest request) {
        
         
-        return ResponseEntity.ok(userService.creditAccount(request));
+        return ResponseEntity.ok(userService.depositAccount(request));
     }
 
     @Operation(
-        summary = "Debit",
+        summary = "Withdraw",
         description = "Given ann account number and amount of balance and subtract it from user account"
     )
     @ApiResponse(
         responseCode = "200",
         description = "Http Status 200 Success"
     )
-    @PostMapping("/debit")
-    public ResponseEntity<BankResponse> debitAccount(@RequestBody CreditDebitRequest request) {
+    @PostMapping("/withdraw")
+    public ResponseEntity<BankResponse> withdrawAccount(@RequestBody DepositWithdrawRequest request) {
        
         
-        return ResponseEntity.ok(userService.debitAccount(request));
+        return ResponseEntity.ok(userService.withdrawAccount(request));
     }
 
     @Operation(

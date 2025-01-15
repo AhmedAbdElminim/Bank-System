@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreditDebitRequest {
+public class DepositWithdrawRequest {
     @Schema(name = "User Account Name")
     private String accountNumber;
     @Schema(name = "User Credit or Debit Amount")

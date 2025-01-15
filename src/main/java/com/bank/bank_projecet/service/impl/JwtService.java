@@ -29,14 +29,13 @@ public class JwtService {
 
     public String extractUsername(String token){
 
-        log.info("token is in extract User name function 1:"+token);
+       
         
         return extractClaim(token, Claims::getSubject);
     }
 
     public <T> T extractClaim(String token,Function<Claims,T>claimResolver){
-       // log.error("the erro occure her location 3");
-        log.info("token is extract Claim 2:"+token);
+   
            final Claims claims=extractAllClaims(token);
            
 
@@ -73,7 +72,6 @@ public class JwtService {
 
      public boolean isTokenValid(String token,UserDetails userDetails){
        
-        log.info("token in  is token valid function 3:"+token);
 
         final String userName=extractUsername(token);
        
@@ -83,7 +81,7 @@ public class JwtService {
 
 
     private Claims extractAllClaims(String token) {
-        log.info("Extracting all claims from token 4: {}", token);
+      
         return Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()

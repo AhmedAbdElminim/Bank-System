@@ -1,7 +1,7 @@
 package com.bank.bank_projecet.service;
 
 import com.bank.bank_projecet.dto.BankResponse;
-import com.bank.bank_projecet.dto.CreditDebitRequest;
+import com.bank.bank_projecet.dto.DepositWithdrawRequest;
 import com.bank.bank_projecet.dto.EnquiryRequest;
 import com.bank.bank_projecet.dto.LoginDto;
 import com.bank.bank_projecet.dto.TransferRequest;
@@ -16,8 +16,8 @@ public interface UserService {
     BankResponse balanceEnquiry(EnquiryRequest enquiryRequest);
     String nameEnquiry(EnquiryRequest enquiryRequest);
 
-    BankResponse creditAccount(CreditDebitRequest request);
-    BankResponse debitAccount(CreditDebitRequest request);
+    BankResponse depositAccount(DepositWithdrawRequest request);
+    BankResponse withdrawAccount(DepositWithdrawRequest request);
     @Transactional
     BankResponse transfer (TransferRequest request);
 
