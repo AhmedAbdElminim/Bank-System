@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.bank.bank_projecet.Security.JwtTokenProvider;
 import com.bank.bank_projecet.dto.AccountInfo;
 import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.CreditDebitRequest;
@@ -35,7 +34,7 @@ private final EmailServiceImpl emailService;
 private final TransactionServiceImpl transactionService;
 private final PasswordEncoder passwordEncoder;
 private final AuthenticationManager authenticationManager;
-private final JwtTokenProvider jwtTokenProvider;
+private final JwtService jwtService;
   
 
     @Override
@@ -94,9 +93,12 @@ private final JwtTokenProvider jwtTokenProvider;
     @Override
     public BankResponse login(LoginDto loginDto){
 
-        Authentication authentication =authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
-            );
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginDto.getEmail(),
+                    loginDto.getPassword()
+                )
+        );
           
 
             EmailDetails loginAlert=EmailDetails.builder()
@@ -107,10 +109,11 @@ private final JwtTokenProvider jwtTokenProvider;
             .build();
             
             emailService.sendEmailAlert(loginAlert);
+            User user=userRepository.findByEmail(loginDto.getEmail()).get();
             
             return BankResponse.builder()
             .responseCode(AccountUtils.LOGIN_SUCCESS_MESSAGE)
-            .responseMessage(jwtTokenProvider.generateToken(authentication))
+            .responseMessage(jwtService.generateToken(user))
             .accountInfo(null)
             .build();
 
