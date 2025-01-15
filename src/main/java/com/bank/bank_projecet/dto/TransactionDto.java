@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransactionDto {
+public class TransactionDto {  
     private String transactionType;
     private BigDecimal amount;
     private String accountNumber;
