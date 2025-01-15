@@ -267,7 +267,7 @@ public class UserServiceImpl implements UserService {
 
                                 throw new BalanceNotEnoughException(
                                                 "Your Balance not Enough to transfer. the available balance amount is :"
-                                                                + request.getAmount().toString());
+                                                                + senderUser.getAccountBalance().toString());
 
                         } else {
                                 senderUser.setAccountBalance(
