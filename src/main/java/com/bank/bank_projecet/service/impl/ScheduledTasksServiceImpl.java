@@ -4,18 +4,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.bank.bank_projecet.dto.EmailDetails;
 import com.bank.bank_projecet.entity.Transaction;
 import com.bank.bank_projecet.entity.User;
+import com.bank.bank_projecet.repository.ScheduledTasksRepository;
 import com.bank.bank_projecet.repository.TransactionRepository;
+import com.bank.bank_projecet.service.ScheduledTasksService;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
@@ -25,27 +28,58 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.DocumentException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Service
-@RequiredArgsConstructor
 @Log4j2
-public class BankStatementServiceImpl {
+@RequiredArgsConstructor
+public class ScheduledTasksServiceImpl implements ScheduledTasksService {
+    private final ScheduledTasksRepository scheduledTasksRepository;
 
-    private final TransactionRepository transactionRepository;
     private final UserServiceImpl userService;
     private final EmailServiceImpl emailService;
-
     private static String FILE = "D:\\Bank Pdfs\\MyStatement.pdf";
 
-    public List<Transaction> generateBankStatement(String accountNumber, String startDate, String endDate)
+    @Override
+    @Scheduled(cron = "0 0 18 * * FRI") // Run every Friday at 6:00 PM
+    public void usersTransactionWeeklyReport() {
+
+        generateReports();
+
+    }
+
+    public void generateReports() {
+
+        try {
+            LocalDate todayDate = LocalDate.now();
+            LocalDate sevenDaysBefore = todayDate.minusDays(7);
+            List<String> accountNumbers = scheduledTasksRepository.findDistinctAccountNumbers();
+
+            for (String accountNumber : accountNumbers) {
+                generateBankStatement(accountNumber, sevenDaysBefore.toString(), todayDate.toString());
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("FileNotFoundException occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (DocumentException e) {
+            System.err.println("DocumentException occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private List<Transaction> generateBankStatement(String accountNumber, String startDate, String endDate)
             throws FileNotFoundException, DocumentException {
         LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
         LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
-        List<Transaction> transactionList = transactionRepository.findAll()
+        List<Transaction> transactionList = scheduledTasksRepository.findAll()
                 .stream()
                 .filter(transaction -> transaction.getAccountNumber().equals(accountNumber))
                 .filter(
@@ -78,7 +112,7 @@ public class BankStatementServiceImpl {
         bankName.setPadding(15f);
         bankName.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-        PdfPCell bankAddress = new PdfPCell(new Phrase("CAIRO, EGYPT", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+        PdfPCell bankAddress = new PdfPCell(new Phrase("Transactions Weekly Report", FontFactory.getFont(FontFactory.HELVETICA_BOLDOBLIQUE, 14,BaseColor.CYAN)));
         bankAddress.setBorder(0);
         bankAddress.setPadding(10f);
         bankAddress.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -193,4 +227,5 @@ public class BankStatementServiceImpl {
         emailService.sendEmailWithAttachment(emailDetails);
 
     }
+
 }

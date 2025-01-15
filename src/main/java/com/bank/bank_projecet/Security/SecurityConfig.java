@@ -20,40 +20,43 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final AuthenticationProvider authenticationProvider;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(
-                        authorizeRequests -> authorizeRequests
-                                .requestMatchers("/api/v1/users/create-account", "/api/v1/users/login",
-                                        "/swagger-ui/**", "/v2/api-docs/**", "/swagger-resources/**", "/webjars/**","/v3/api-docs/**")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(
-                        SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http.csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(
+                                                authorizeRequests -> authorizeRequests
+                                                                .requestMatchers("/api/v1/users/create-account",
+                                                                                "/api/v1/users/login", "/test/get",
+                                                                                "/swagger-ui/**", "/v2/api-docs/**",
+                                                                                "/swagger-resources/**", "/webjars/**",
+                                                                                "/v3/api-docs/**")
+                                                                .permitAll()
+                                                                .anyRequest()
+                                                                .authenticated())
+                                .sessionManagement(session -> session.sessionCreationPolicy(
+                                                SessionCreationPolicy.STATELESS))
+                                .authenticationProvider(authenticationProvider)
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET", "POST"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        @Bean
+        CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of("http://localhost:8080"));
+                configuration.setAllowedMethods(List.of("GET", "POST"));
+                configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+                source.registerCorsConfiguration("/**", configuration);
 
-        return source;
+                return source;
 
-    }
+        }
 
 }
