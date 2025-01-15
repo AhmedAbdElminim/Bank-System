@@ -23,7 +23,8 @@ public class DepositWithdrawRequest {
     @NotNull(message = "Account number must not be null")
     private String accountNumber;
     @Schema(name = "User Credit or Debit Amount")
-    @Digits(integer=2, fraction=0,message = "Please enter your amount of balance that you need to deposit or withdraw")
+    @Digits(integer=6, fraction=2,message = "Please enter your amount of balance that you need to deposit or withdraw")
+    @NotNull
     private BigDecimal amount;
 
 }
