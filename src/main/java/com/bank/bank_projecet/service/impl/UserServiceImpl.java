@@ -1,12 +1,10 @@
 package com.bank.bank_projecet.service.impl;
 
 import java.math.BigDecimal;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.bank.bank_projecet.dto.AccountInfo;
 import com.bank.bank_projecet.dto.BankResponse;
 import com.bank.bank_projecet.dto.DepositWithdrawRequest;
@@ -25,7 +23,6 @@ import com.bank.bank_projecet.exception.UserNotFoundException;
 import com.bank.bank_projecet.repository.UserRepository;
 import com.bank.bank_projecet.service.UserService;
 import com.bank.bank_projecet.utils.AccountUtils;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -40,7 +37,6 @@ private final PasswordEncoder passwordEncoder;
 private final AuthenticationManager authenticationManager;
 private final JwtService jwtService;
   
-
     @Override
     public BankResponse createNewUser(UserDto userDto) {
 
@@ -88,7 +84,6 @@ private final JwtService jwtService;
       .build();
     }
 
-
     @Override
     public BankResponse login(LoginDto loginDto){
 
@@ -125,12 +120,8 @@ private final JwtService jwtService;
 
     }
 
-    
-
-
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest enquiryRequest) {
-       //check if account number is exists in database
 
        if(!userRepository.existsByAccountNumber(enquiryRequest.getAccountNumber())){
 
@@ -150,7 +141,6 @@ private final JwtService jwtService;
        .build();
     }
 
-
     @Override
     public String nameEnquiry(EnquiryRequest enquiryRequest) {
 
@@ -161,7 +151,6 @@ private final JwtService jwtService;
            User user=userRepository.findByAccountNumber(enquiryRequest.getAccountNumber());
            return user.getF_Name()+" "+user.getL_Name();
     }
-
 
     @Override
     public BankResponse depositAccount(DepositWithdrawRequest request) {
@@ -177,7 +166,7 @@ private final JwtService jwtService;
            TransactionDto transactionDto=TransactionDto.builder()
            .accountNumber(user.getAccountNumber())
            .amount(request.getAmount())
-           .transactionType("CREDIT")
+           .transactionType("DEPOSIT")
            .build();
            transactionService.saveTransaction(transactionDto);
 
@@ -193,7 +182,6 @@ private final JwtService jwtService;
            .build();
 
     }
-
 
     @Override
     public BankResponse withdrawAccount(DepositWithdrawRequest request) {
@@ -211,7 +199,7 @@ private final JwtService jwtService;
            TransactionDto transactionDto=TransactionDto.builder()
            .accountNumber(user.getAccountNumber())
            .amount(request.getAmount())
-           .transactionType("DEBIT")
+           .transactionType("WITHDRAW")
            .build();
            transactionService.saveTransaction(transactionDto);
 
@@ -257,8 +245,6 @@ private final JwtService jwtService;
                 throw new BalanceNotEnoughException("Your Balance not Enough to transfer. the available balance amount is :"+request.getAmount().toString());
 
             }else{
-
-
                 senderUser.setAccountBalance(senderUser.getAccountBalance().subtract(request.getAmount()));
                 reciverUser.setAccountBalance(reciverUser.getAccountBalance().add(request.getAmount()));
 
@@ -278,9 +264,6 @@ private final JwtService jwtService;
                 transactionService.saveTransaction(senderTransaction);
                 transactionService.saveTransaction(reciverTransaction);
 
-
-
-
                 return BankResponse.builder()
                 .responseCode(AccountUtils.TRANSFER_DONE_SUCCESSFULLY_CODE)
                 .responseMessage(AccountUtils.TRANSFER_DONE_SUCCESSFULLY_MESSAGE)
@@ -290,24 +273,10 @@ private final JwtService jwtService;
                 .accountNumber(senderUser.getAccountNumber())
                 .build())
                 .build();
-
-
-
             }
-
-
-
-
-
-
-
-
         }
 
     }
-
-
-
 
     @Override
     public User findUserByAccountNumber(String accountNumber) {
