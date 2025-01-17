@@ -31,7 +31,7 @@ public class Transaction {
     private String transactionType;
     private BigDecimal amount;
     private String accountNumber;
-    private String status;
+    private String status; 
     @CreationTimestamp
     private LocalDate createdDate;
     @UpdateTimestamp

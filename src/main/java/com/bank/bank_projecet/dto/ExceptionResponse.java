@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class ExceptionResponse {
-    private String message;
+    private String message; 
     private Boolean status;
     private LocalDateTime date;
     private List<String> details;

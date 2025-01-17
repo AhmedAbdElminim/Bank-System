@@ -11,7 +11,7 @@ import lombok.Setter;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor 
 @Setter
 @Getter
 public class EnquiryRequest {

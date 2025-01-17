@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor 
 @Builder
 public class LoginDto {
     @Email(message = "You Should enter a Valid email")

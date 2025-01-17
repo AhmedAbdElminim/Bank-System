@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BankResponse {
+public class BankResponse { 
     @Schema(name = "Bank Response Code")
     private String responseCode;
     @Schema(name = "Bank Response Message")

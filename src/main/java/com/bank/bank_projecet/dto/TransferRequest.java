@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@Data 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -28,7 +28,6 @@ public class TransferRequest {
      @Size(min = 10, max = 10, message = "Please enter valid reciver account numbber")
      private String reciverAcountNumber;
      @Schema(name = "The Amount of balance that transfer")
-     @Digits(integer = 2, fraction = 0)
      private BigDecimal amount;
 
 }

@@ -17,7 +17,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
+@Setter 
 @Getter
 public class UserDto {
     @Schema(name = "User First Name")

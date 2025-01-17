@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder 
 public class EmailDetails {
     @Schema(name = "Reciver Email")
     private String recipient;
