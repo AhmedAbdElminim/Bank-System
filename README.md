@@ -1,1 +1,1 @@
-
+The bank system allows users to create accounts and perform main transactions, such as deposits, withdrawals, transfers, and balance inquiries. It also generates transaction reports for a specified period and sends weekly reports to clients detailing their transactions. Additionally, the system sends an email notification to clients for every transaction they perform.
